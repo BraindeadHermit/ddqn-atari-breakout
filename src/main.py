@@ -1,10 +1,9 @@
 import torch
-from src.breakout import DQNBreackout
-from src.model import DDQNAgent
+from breakout import DQNBreackout
+from model import DDQNAgent
 
 """
     Atari Breakout con dueling deep q-learning
-     
 """
 
 # nel momento in cui si esegue il codice, si controlla se è disponibile una GPU, altrimenti si utilizza la CPU del pc
