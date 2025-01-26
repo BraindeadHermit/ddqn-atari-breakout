@@ -1,6 +1,7 @@
 import torch
 from breakout import DQNBreackout
 from model import DDQNAgent
+from agent import Agent
 
 """
     Atari Breakout con dueling deep q-learning
@@ -9,22 +10,30 @@ from model import DDQNAgent
 # nel momento in cui si esegue il codice, si controlla se è disponibile una GPU, altrimenti si utilizza la CPU del pc
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-environment = DQNBreackout(device=device, render_mode='human')
+environment = DQNBreackout(device=device)
 
-agent = DDQNAgent(nb_actions=4)
-agent.to(device)
+model = DDQNAgent(nb_actions=4)
+model.to(device)
 
-# resetta l'ambiente dopo ogni iterazione
-state = environment.reset()
+model.load_model()
 
-print(agent.forward(state))
+EPSILON = 1.0
+LEARNING_RATE = 0.00001
+GAMMA = 0.99
+BATCH_SIZE = 64
+MEMORY_SIZE = 1000000
+NB_WARMUP  = 5000
+NB_ACTIONS = 4
 
-'''
-for i in range(100):
-    environment.step(environment.action_space.sample())
 
-    state, reward, done, truncated, info = environment.step(environment.action_space.sample())
+agent = Agent(model=model, 
+              device=device, 
+              epsilon=EPSILON, 
+              nb_warmup=NB_WARMUP, 
+              nb_actions=NB_ACTIONS, 
+              learning_rate=LEARNING_RATE,
+              memory_size=MEMORY_SIZE,
+              batch_size=BATCH_SIZE,
+              gamma=GAMMA)
 
-    # renderizza l'ambiente
-    environment.render()
-'''
+agent.train(env=environment, epochs=20)

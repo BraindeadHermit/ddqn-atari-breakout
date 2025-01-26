@@ -69,9 +69,6 @@ class DQNBreackout(gym.Wrapper):
                 # aggorna il numero di vite
                 self.lives = current_lives
 
-            print("Current Lives", current_lives)
-            print("Total Reward", total_reward)
-
             self.frame_buffer.append(obs)
 
             if done:

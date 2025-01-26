@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import os
 
 class DDQNAgent(nn.Module):
     '''
@@ -82,6 +83,8 @@ class DDQNAgent(nn.Module):
     
     def save_model(self, path="model/model.pth"):
         # salviamo il dizionario di stati e pesi del modello
+        if not os.path.exists("model"):
+            os.makedirs("model")
         torch.save(self.state_dict(), path)
 
     def load_model(self, path="model/model.pth"):
