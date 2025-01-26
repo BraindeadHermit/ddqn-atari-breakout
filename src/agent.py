@@ -29,7 +29,7 @@ class ReplayMemory:
             self.memory.append(args)
 
     def can_provide_sample(self, memory, batch_size):
-        return len(self.memory) >= batch_size * 10
+        return len(memory) >= batch_size * 10
 
     '''
         quando servono, i dati vengono riportati sulla gpu
@@ -120,10 +120,10 @@ class Agent:
 
             # aggiorniamo il target model
             if epoch % 10 == 0:
-                self.model.save_model('model.pth')
+                self.model.save_model('model/model.pth')
                 print('Epoch: ', epoch, 'Reward: ', total_reward, 'Epsilon: ', self.epsilon)
                 stats['rewards'].append(total_reward)
-                stats['avg_reward'].append(np.mean(stats['rewards'][-100:]))
+                stats['avg_reward'].append(np.mean(stats['rewards']))
                 stats['epsilon'].append(self.epsilon)
                 
                 '''
@@ -131,9 +131,9 @@ class Agent:
                     per le iterazioni successive stampiamo la media dei reward degli ultimi 100 episodi
                 '''
                 if (len(stats['rewards'])) > 100:
-                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"][-100:])}, Epsilon: {self.epsilon}')
+                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"])}, Epsilon: {self.epsilon}')
                 else:
-                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"][-1:])}, Epsilon: {self.epsilon}')
+                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"])}, Epsilon: {self.epsilon}')
             
             # aggiorniamo il target model
             if epoch % 100 == 0:

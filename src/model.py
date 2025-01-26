@@ -52,7 +52,7 @@ class DDQNAgent(nn.Module):
     '''
     def forward(self, x):
         # per sicurezza verifichiamo che l'immagine in input sia un tensore
-        x = torch.Tensor(x)
+        x = torch.tensor(x, dtype=torch.float32)
         # Estrazione delle features
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
