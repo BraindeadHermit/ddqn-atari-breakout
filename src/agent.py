@@ -109,7 +109,7 @@ class Agent:
                     loss = F.mse_loss(qsa_b, target_b)
                     if loss != 0.0:
                         stats['loss'].append(loss.item())
-                    self.model.zero_grad()
+                    self.optimizer.zero_grad()
                     # back propagation
                     loss.backward()
                     self.optimizer.step()
@@ -145,6 +145,7 @@ class Agent:
                 self.model.save_model(f'model/model_{epoch}.pt')
                 print('Model saved')
         
+        self.model.save_model("model/atari-brekout-v1.0.pth")
         plotter.plot(stats)
 
         return stats
