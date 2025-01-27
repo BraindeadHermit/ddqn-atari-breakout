@@ -52,7 +52,7 @@ class DDQNAgent(nn.Module):
     '''
     def forward(self, x):
         # per sicurezza verifichiamo che l'immagine in input sia un tensore
-        x = torch.tensor(x, dtype=torch.float32)
+        x = x.clone().detach()
         # Estrazione delle features
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
@@ -90,7 +90,7 @@ class DDQNAgent(nn.Module):
     def load_model(self, path="model/model.pth"):
         # carichiamo il dizionario di stati e pesi del modello
         try:
-            self.load_state_dict(torch.load(path))
+            self.load_state_dict(torch.load(path, weights_only=True))
             print("[load] - ","Model loaded successfully")
         except:
             print("[load] - ","Model not loaded")

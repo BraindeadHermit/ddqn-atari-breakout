@@ -65,11 +65,12 @@ class Agent:
         self.gamma = gamma
         self.nb_actions = nb_actions
 
-        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
-
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=learning_rate)
+        print('-----------------------------------------------------------------------------------------------')
         print('Agent initialized with device: ', device)
         print('Agent initialized with epsilon: ', epsilon)
         print('Agent initialized with epsilon decay: ', self.epsilon_decay)
+        print('-----------------------------------------------------------------------------------------------')
 
     def get_action(self, state):
         if torch.rand(1) < self.epsilon:
@@ -81,19 +82,20 @@ class Agent:
             return torch.argmax(av, dim=1, keepdim=True)
         
     def train(self, env, epochs):
-        stats = {'loss': [], 'reward': [], 'rewards': [], 'avg_reward': [], 'epsilon': []}
+        stats = {'loss': [], 'rewards': [], 'avg_reward': [], 'epsilon': []}
 
-        plotter = Plots()
+        plotter = Plots(epochs=epochs)
 
         for epoch in range(epochs):
             # ad ogni epoca resettiamo l'ambiente
             state = env.reset()
             done = False
             total_reward = 0
+            loss = 0
+
             while not done:
                 action = self.get_action(state)
                 next_state, reward, done, _, _ = env.step(action)
-                total_reward += reward
                 self.memory.push(state, action, next_state, reward, done)
 
 
@@ -104,7 +106,9 @@ class Agent:
                     next_qsa_b = self.target_model(next_state_b)
                     next_qsa_b = torch.max(next_qsa_b, dim=1, keepdim=True)[0]
                     target_b = reward_b + self.gamma * next_qsa_b *  ~done_b
-                    loss = F.smooth_l1_loss(qsa_b, target_b)
+                    loss = F.mse_loss(qsa_b, target_b)
+                    if loss != 0.0:
+                        stats['loss'].append(loss.item())
                     self.model.zero_grad()
                     # back propagation
                     loss.backward()
@@ -113,32 +117,24 @@ class Agent:
                 state = next_state
                 total_reward += reward.item()
             
-            stats['reward'].append(total_reward)
+            print('Epoch Number', epoch)
+
+            stats['rewards'].append(total_reward)
+            stats['avg_reward'].append(np.mean(stats['rewards']))
+            stats['epsilon'].append(self.epsilon)
 
             if self.epsilon > self.min_epsilon:
                 self.epsilon -= self.epsilon_decay
 
-            # aggiorniamo il target model
-            if epoch % 10 == 0:
-                self.model.save_model('model/model.pth')
-                print('Epoch: ', epoch, 'Reward: ', total_reward, 'Epsilon: ', self.epsilon)
-                stats['rewards'].append(total_reward)
-                stats['avg_reward'].append(np.mean(stats['rewards']))
-                stats['epsilon'].append(self.epsilon)
+            # mostriamo le statistiche ogni 5 epoche
+            if epoch % 5 == 0:
+                print('Epoch: ', epoch, 'Avg Reward: ', total_reward, 'Epsilon: ', self.epsilon, 'Loss: ', loss)
                 
-                '''
-                    per le prime 100 iterazioni stampiamo il reward di ogni episodio,
-                    per le iterazioni successive stampiamo la media dei reward degli ultimi 100 episodi
-                '''
-                if (len(stats['rewards'])) > 100:
-                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"])}, Epsilon: {self.epsilon}')
-                else:
-                    print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"])}, Epsilon: {self.epsilon}')
             
             # aggiorniamo il target model
             if epoch % 100 == 0:
                 self.target_model.load_state_dict(self.model.state_dict())
-                #plotter.plot(stats)
+                
 
             '''
                 salviamo il modello ogni 1000 epoche,
@@ -146,26 +142,19 @@ class Agent:
                 all'epoca x e poi cominciare a peggiorare, abbiamo il modello a quella determinata epoca salvato
             '''
             if epoch % 1000 == 0:
-                self.model.save_model('model/model_{epoch}.pth')
+                self.model.save_model(f'model/model_{epoch}.pt')
                 print('Model saved')
         
+        plotter.plot(stats)
+
         return stats
     
     def test(self, env, epochs):
-        stats = {'reward': [], 'rewards': [], 'avg_reward': []}
-        for epoch in range(epochs):
+        for _ in range(epochs):
             state = env.reset()
             done = False
-            total_reward = 0
+    
             while not done:
                 action = self.get_action(state)
-                next_state, reward, done, _ = env.step(action)
-                total_reward += reward
-                state = next_state
-
-            stats['reward'].append(total_reward)
-            stats['rewards'].append(total_reward)
-            stats['avg_reward'].append(np.mean(stats['rewards']))
-            print(f'Epoch: {epoch}, Avg Reward: {np.mean(stats["rewards"])}')
-        
-        return stats
+                env.step(action)
+                
