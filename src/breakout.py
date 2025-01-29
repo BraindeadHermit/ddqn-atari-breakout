@@ -7,7 +7,7 @@ import torch
 
 class DQNBreackout(gym.Wrapper):
     def __init__(self, render_mode='rgb_array', repeat = 4, device='cpu'):
-        env = gym.make('BreakoutNoFrameskip-v4',  render_mode=render_mode)
+        env = gym.make('Breakout-v4',  render_mode=render_mode)
         super(DQNBreackout, self).__init__(env) # eredita da gym.Wrapper, ovvero dall'ambiente iniziale di gym
         self.device = device
         self.repeat = repeat

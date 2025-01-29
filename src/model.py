@@ -90,7 +90,7 @@ class DDQNAgent(nn.Module):
     def load_model(self, path="model/model.pth"):
         # carichiamo il dizionario di stati e pesi del modello
         try:
-            self.load_state_dict(torch.load(path, weights_only=True))
+            self.load_state_dict(torch.load(path, weights_only=False))
             print("[load] - ","Model loaded successfully")
         except:
             print("[load] - ","Model not loaded")
