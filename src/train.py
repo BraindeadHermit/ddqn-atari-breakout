@@ -16,15 +16,15 @@ environment = DQNBreackout(device=device, repeat=8)
 model = DDQNAgent(nb_actions=4)
 model.to(device)
 
-model.load_model("model/atari-brekout-v1.0.pth")
+model.load_model("model/model_9000.pth")
 
-EPSILON = 0.2
+EPSILON = 0.55
 LEARNING_RATE = 1e-4
 GAMMA = 0.99
 BATCH_SIZE = 64
-EPOCHS = 2000
+EPOCHS = 10000
 MEMORY_SIZE = 1000000
-NB_WARMUP  = 5000
+NB_WARMUP  = 10000
 NB_ACTIONS = 4
 MIN_EPSILON = 0.05
 

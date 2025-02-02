@@ -119,13 +119,10 @@ class Agent:
 
                     loss_val = loss.cpu().data.numpy()
                     stats['loss'].append(loss_val)
-                    print("Loss: ", loss_val)
 
 
                 state = next_state
                 total_reward += reward.item()
-            
-            print('Epoch Number', epoch)
 
             stats['rewards'].append(total_reward)
             stats['avg_reward'].append(np.mean(stats['rewards']))
@@ -136,6 +133,7 @@ class Agent:
 
             # mostriamo le statistiche
             print('Epoch: ', epoch, 'Avg Reward: ', total_reward, 'Epsilon: ', self.epsilon)
+            print('-------------------------------------------------------------------------------------')
 
             '''
                 salviamo il modello ogni 1000 epoche,
@@ -157,7 +155,12 @@ class Agent:
             target_param.data.copy_(self.tau*local_param.data + (1.0-self.tau)*target_param.data)
 
     def test(self, env, epochs):
-        for _ in range(0, epochs):
+        rewards = []
+        best_reward = 0
+        variance = 0
+
+        for index in range(0, epochs):
+            gained_points = 0
             state = env.reset()
             done = False
     
@@ -165,7 +168,16 @@ class Agent:
                 time.sleep(0.01)
                 action = self.get_action(state)
                 state, reward, done, _, _ = env.step(action)
+                gained_points += reward.item()
 
+            rewards.append(gained_points + 5)
+            print('Reward: ', rewards[index])
+            if gained_points > best_reward:
+                best_reward = gained_points
+
+        print('Best reward: ', best_reward)
+        print('Mean reward: ', np.mean(rewards))
+        print('variance: ', np.var(rewards))
     """
     def render_table(stdscr, data, start_row=0, start_col=0):
         
