@@ -11,19 +11,19 @@ from agent import Agent
 print("Cuda is available: ", torch.cuda.is_available())
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-environment = DQNBreackout(device=device, repeat=8)
+environment = DQNBreackout(device=device, repeat=8, render_mode='human')
 
 model = DDQNAgent(nb_actions=4)
 model.to(device)
 
-#model.load_model("model/model_11000.pth")
+#model.load_model("model/atari-brekout-v1.0.pth")
 model.load_model("model/atari-brekout-v2.0.pth")
 
 EPSILON = 0.05
 LEARNING_RATE = 2.5e-4
 GAMMA = 0.99
 BATCH_SIZE = 64
-EPOCHS = 50    
+EPOCHS = 10    
 MEMORY_SIZE = 1000000                                        
 NB_WARMUP  = 5000
 NB_ACTIONS = 4
